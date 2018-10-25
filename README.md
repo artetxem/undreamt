@@ -16,6 +16,8 @@ If you use this software for academic research, please cite the paper in questio
 }
 ```
 
+**NOTE**: This software has been superseded by [Monoses](https://github.com/artetxem/monoses), our unsupervised statistical machine translation system. [Monoses](https://github.com/artetxem/monoses) obtains substantially better results (e.g. 26.2 vs 15.1 BLEU in English-French WMT14), so we strongly recommend that you switch to it.
+
 
 Requirements
 --------
@@ -49,12 +51,17 @@ For more details and additional options, run the above scripts with the `--help`
 FAQ
 --------
 
-###### You claim that your unsupervised NMT system is trained on monolingual corpora alone, but it also requires bilingual embeddings... Isn't that cheating?
+##### I have seen that you have a separate unsupervised SMT system called [Monoses](https://github.com/artetxem/monoses). Which one should I use?
+
+You should definitely use [Monoses](https://github.com/artetxem/monoses). It is newer and obtains substantially better results (e.g. 26.2 vs 15.1 BLEU in English-French WMT14), so we strongly recommend that you switch to it.
+
+
+##### You claim that your unsupervised NMT system is trained on monolingual corpora alone, but it also requires bilingual embeddings... Isn't that cheating?
 
 Not really, because we also learn the bilingual embeddings from monolingual corpora alone. We use our companion tool [VecMap](https://github.com/artetxem/vecmap) for that.
 
 
-###### Can I use this software to train a regular NMT system on parallel corpora?
+##### Can I use this software to train a regular NMT system on parallel corpora?
 
 Yes! You can use the following arguments to make UNdreaMT behave like a regular NMT system:
 
