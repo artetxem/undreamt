@@ -35,7 +35,8 @@ class Translator:
         self.device = device
         weight = device(torch.ones(generator.output_classes()))
         weight[data.PAD] = 0
-        self.criterion = nn.NLLLoss(weight, size_average=False)
+#         self.criterion = nn.NLLLoss(weight, size_average=False)
+        self.criterion = nn.NLLLoss(weight, reduction='mean')
 
     def _train(self, mode):
         self.encoder_embeddings.train(mode)
