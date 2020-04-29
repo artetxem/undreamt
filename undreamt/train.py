@@ -75,7 +75,7 @@ def main_train():
     # Reloading model from checkpoint
 
     reload_group = parser.add_argument_group('reload model', 'Arguments for resuming saved models')
-    reload_group.add_argument('--reload_checkpoints', type=str, default="", help='reload model from models base path alogwith iteration number')
+    reload_group.add_argument('--reload_checkpoints', type=str, default="", help='reload model from models base path alogwith iteration number Ex: --reload_checkpoints path/to/model/model.it20000')
     # reload_group.add_argument('--reload_checkpoint_s2s', type=str, default="", help='reload src2src model')
     # reload_group.add_argument('--reload_checkpoint_t2t', type=str, default="", help='reload trg2trg model')
     # reload_group.add_argument('--reload_checkpoint_s2t', type=str, default="", help='reload src2trg model')
