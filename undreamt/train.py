@@ -23,7 +23,7 @@ import argparse
 import numpy as np
 import sys
 import time
-
+import os
 
 def main_train():
     # Build argument parser
@@ -71,6 +71,16 @@ def main_train():
     saving_group = parser.add_argument_group('model saving', 'Arguments for saving the trained model')
     saving_group.add_argument('--save', metavar='PREFIX', help='save models with the given prefix')
     saving_group.add_argument('--save_interval', type=int, default=0, help='save intermediate models at this interval')
+
+    # Reloading model from checkpoint
+
+    reload_group = parser.add_argument_group('reload model', 'Arguments for resuming saved models')
+    reload_group.add_argument('--reload_checkpoints', type=str, default="", help='reload model from models base path alogwith iteration number')
+    # reload_group.add_argument('--reload_checkpoint_s2s', type=str, default="", help='reload src2src model')
+    # reload_group.add_argument('--reload_checkpoint_t2t', type=str, default="", help='reload trg2trg model')
+    # reload_group.add_argument('--reload_checkpoint_s2t', type=str, default="", help='reload src2trg model')
+    # reload_group.add_argument('--reload_checkpoint_t2s', type=str, default="", help='reload trg2src model')
+
 
     # Logging/validation
     logging_group = parser.add_argument_group('logging', 'Logging and validation arguments')
@@ -196,27 +206,66 @@ def main_train():
     add_optimizer(trg_decoder, (trg2trg_optimizers, src2trg_optimizers))
 
     # Build translators
-    src2src_translator = Translator(encoder_embeddings=src_encoder_embeddings,
-                                    decoder_embeddings=src_decoder_embeddings, generator=src_generator,
-                                    src_dictionary=src_dictionary, trg_dictionary=src_dictionary, encoder=encoder,
-                                    decoder=src_decoder, denoising=not args.disable_denoising, device=device)
-    src2trg_translator = Translator(encoder_embeddings=src_encoder_embeddings,
-                                    decoder_embeddings=trg_decoder_embeddings, generator=trg_generator,
-                                    src_dictionary=src_dictionary, trg_dictionary=trg_dictionary, encoder=encoder,
-                                    decoder=trg_decoder, denoising=not args.disable_denoising, device=device)
-    trg2trg_translator = Translator(encoder_embeddings=trg_encoder_embeddings,
-                                    decoder_embeddings=trg_decoder_embeddings, generator=trg_generator,
-                                    src_dictionary=trg_dictionary, trg_dictionary=trg_dictionary, encoder=encoder,
-                                    decoder=trg_decoder, denoising=not args.disable_denoising, device=device)
-    trg2src_translator = Translator(encoder_embeddings=trg_encoder_embeddings,
-                                    decoder_embeddings=src_decoder_embeddings, generator=src_generator,
-                                    src_dictionary=trg_dictionary, trg_dictionary=src_dictionary, encoder=encoder,
-                                    decoder=src_decoder, denoising=not args.disable_denoising, device=device)
+
+    # reload from checkpoints if available
+    # if args.reload_checkpoint_s2s is not None AND args.reload_checkpoint_t2t is not None AND args.reload_checkpoint_s2t is not None AND args.reload_checkpoint_t2s is not None:
+    
+
+    # Method to reload from a checkpoint
+    # def reload_checkpoint(checkpoint_path_prefix):
+    #     """
+    #     Method to reload from a checkpoint
+    #     if available
+    #     """
+    #     # load the previous models
+    #     s2s_checkpoint_path = ('{}.src2src.pth'.format(checkpoint_path_prefix))
+    #     t2t_checkpoint_path = ('{}.trg2trg.pth'.format(checkpoint_path_prefix))
+    #     s2t_checkpoint_path = ('{}.src2trg.pth'.format(checkpoint_path_prefix))
+    #     t2s_checkpoint_path = ('{}.trg2src.pth'.format(checkpoint_path_prefix))
+        
+    #     src2src_translator = torch.load(s2s_checkpoint_path)
+    #     trg2trg_translator = torch.load(t2t_checkpoint_path)
+    #     src2trg_translator = torch.load(s2t_checkpoint_path)
+    #     trg2src_translator = torch.load(t2s_checkpoint_path)
+
+    #     return src2src_translator, trg2trg_translator, src2trg_translator, trg2src_translator
+
+
+    if args.reload_checkpoints:
+        # src2src_translator, trg2trg_translator, src2trg_translator, trg2src_translator = reload_checkpoint(args.reload_checkpoints)
+        s2s_checkpoint_path = ('{}.src2src.pth'.format(args.reload_checkpoints))
+        t2t_checkpoint_path = ('{}.trg2trg.pth'.format(args.reload_checkpoints))
+        s2t_checkpoint_path = ('{}.src2trg.pth'.format(args.reload_checkpoints))
+        t2s_checkpoint_path = ('{}.trg2src.pth'.format(args.reload_checkpoints))
+        src2src_translator = torch.load(s2s_checkpoint_path)
+        trg2trg_translator = torch.load(t2t_checkpoint_path)
+        src2trg_translator = torch.load(s2t_checkpoint_path)
+        trg2src_translator = torch.load(t2s_checkpoint_path)
+        
+    else: 
+        src2src_translator = Translator(encoder_embeddings=src_encoder_embeddings,
+                                        decoder_embeddings=src_decoder_embeddings, generator=src_generator,
+                                        src_dictionary=src_dictionary, trg_dictionary=src_dictionary, encoder=encoder,
+                                        decoder=src_decoder, denoising=not args.disable_denoising, device=device)
+        src2trg_translator = Translator(encoder_embeddings=src_encoder_embeddings,
+                                        decoder_embeddings=trg_decoder_embeddings, generator=trg_generator,
+                                        src_dictionary=src_dictionary, trg_dictionary=trg_dictionary, encoder=encoder,
+                                        decoder=trg_decoder, denoising=not args.disable_denoising, device=device)
+        trg2trg_translator = Translator(encoder_embeddings=trg_encoder_embeddings,
+                                        decoder_embeddings=trg_decoder_embeddings, generator=trg_generator,
+                                        src_dictionary=trg_dictionary, trg_dictionary=trg_dictionary, encoder=encoder,
+                                        decoder=trg_decoder, denoising=not args.disable_denoising, device=device)
+        trg2src_translator = Translator(encoder_embeddings=trg_encoder_embeddings,
+                                        decoder_embeddings=src_decoder_embeddings, generator=src_generator,
+                                        src_dictionary=trg_dictionary, trg_dictionary=src_dictionary, encoder=encoder,
+                                        decoder=src_decoder, denoising=not args.disable_denoising, device=device)
 
     # Build trainers
     trainers = []
     src2src_trainer = trg2trg_trainer = src2trg_trainer = trg2src_trainer = None
     srcback2trg_trainer = trgback2src_trainer = None
+
+
     if args.src is not None:
         f = open(args.src, encoding=args.encoding, errors='surrogateescape')
         corpus = data.CorpusReader(f, max_sentence_length=args.max_sentence_length, cache_size=args.cache)
@@ -292,8 +341,14 @@ def main_train():
         torch.save(src2trg_translator, '{0}.{1}.src2trg.pth'.format(args.save, name))
         torch.save(trg2src_translator, '{0}.{1}.trg2src.pth'.format(args.save, name))
 
+     
     # Training
-    for step in range(1, args.iterations + 1):
+
+    #
+    if args.reload_checkpoints:
+        step_size = int(''.join(c for c in s2s_checkpoint_path.split(".")[-3] if c.isdigit())) + 1 # extract the iteration number from the filename
+    else: step_size = 1
+    for step in range(step_size, args.iterations + 1):
         for trainer in trainers:
             trainer.step()
 
@@ -334,7 +389,8 @@ class Trainer:
         # Compute loss
         t = time.time()
         loss = self.translator.score(src, trg, train=True)
-#         self.loss += loss.data[0]
+        # self.loss += loss.data[0] 
+        # deprecated
         self.loss += loss.item()
         self.forward_time += time.time() - t
 
