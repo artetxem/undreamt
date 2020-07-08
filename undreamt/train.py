@@ -334,7 +334,7 @@ class Trainer:
         # Compute loss
         t = time.time()
         loss = self.translator.score(src, trg, train=True)
-        self.loss += loss.data[0]
+        self.loss += loss.data
         self.forward_time += time.time() - t
 
         # Backpropagate error + optimize
@@ -383,7 +383,7 @@ class Validator:
         loss = 0
         for i in range(0, self.sentence_count, self.batch_size):
             j = min(i + self.batch_size, self.sentence_count)
-            loss += self.translator.score(self.sorted_source[i:j], self.sorted_reference[i:j], train=False).data[0]
+            loss += self.translator.score(self.sorted_source[i:j], self.sorted_reference[i:j], train=False).data
         return np.exp(loss/self.reference_word_count)
 
     def translate(self):
